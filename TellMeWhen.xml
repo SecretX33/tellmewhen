@@ -1,0 +1,662 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+	<Script file="Lib\LibStub\LibStub.lua"/>
+	<Include file="Lib\CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
+	<Include file="Lib\AceGUI-3.0\AceGUI-3.0.xml"/>
+	<Include file="Lib\LibSharedMedia-3.0\lib.xml"/>
+	<Include file="Lib\AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
+	
+	
+    <Include file="Lib\AceConfig-3.0\AceConfig-3.0.xml"/>
+	<Script file="Localization\TellMeWhen-enUS.lua"/>
+	<Script file="TellMeWhen.lua"/>
+	<Script file="TellMeWhen_options.lua"/>
+
+	
+	<Frame name="TellMeWhen_GroupTemplate" enableMouse="false" parent="UIParent" virtual="true">
+		<Size>
+			<AbsDimension x="1" y="1"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture setAllPoints="true">
+					<Color r="0" g="0" b="0" a="0"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parent_ResizeButton" frameStrata="HIGH">
+				<Size>
+					<AbsDimension x="10" y="10"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentTexture" file="Interface\AddOns\TellMeWhen\Textures\Resize">
+							<Size>
+								<AbsDimension x="10" y="10"/>
+							</Size>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						local texture = _G[self:GetName().."Texture"];
+						texture:SetVertexColor(0.6, 0.6, 0.6);
+					</OnLoad>
+					<OnMouseDown>
+						TellMeWhen_StartSizing(self, button);
+					</OnMouseDown>
+					<OnMouseUp>
+						TellMeWhen_StopSizing(self, button);
+					</OnMouseUp>
+					<OnEnter>
+						TellMeWhen_GUIButton_OnEnter(self, TELLMEWHEN_RESIZE, TELLMEWHEN_RESIZE_TOOLTIP);
+						local texture = getglobal(self:GetName().."Texture");
+						texture:SetVertexColor(1, 1, 1);
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+						local texture = getglobal(self:GetName().."Texture");
+						texture:SetVertexColor(0.6, 0.6, 0.6);
+					</OnLeave>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
+
+	<Frame name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
+		<Size>
+			<AbsDimension x="30" y="30"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture file="Interface\Buttons\UI-EmptySlot-Disabled">
+					<Size>
+						<AbsDimension x="46" y="46"/>
+					</Size>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentTexture" file="Interface\Icons\INV_Misc_QuestionMark">
+					<Size>
+						<AbsDimension x="30" y="30"/>
+					</Size>
+				</Texture>
+				<FontString name="$parentCount" inherits="NumberFontNormalSmall" justifyH="RIGHT">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-2" y="2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+			<Layer level="HIGHLIGHT">
+				<Texture name="$parentHighlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD">
+					<Size>
+						<AbsDimension x="30" y="30"/>
+					</Size>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self:RegisterForDrag("LeftButton");
+			</OnLoad>
+			<OnEnter>
+				TellMeWhen_Icon_OnEnter(self, motion);
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
+			<OnMouseDown>
+				TellMeWhen_Icon_OnMouseDown(self, button);
+			</OnMouseDown>
+			<OnDragStart>
+				self:GetParent():StartMoving();
+			</OnDragStart>
+			<OnDragStop>
+				self:GetParent():StopMovingOrSizing();
+			</OnDragStop>
+		</Scripts>
+		<Frames>
+			<Cooldown name="$parentCooldown" inherits="CooldownFrameTemplate">
+				<Size x="30" y="30"/>
+				<Anchors>
+					<Anchor point="CENTER">
+						<Offset>
+							<AbsDimension x="0" y="-1"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Cooldown>
+			<Frame name="$parentDropDown" inherits="UIDropDownMenuTemplate" hidden="true">
+				<Anchors>
+					<Anchor point="TOP"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						UIDropDownMenu_Initialize(self, TellMeWhen_IconMenu_Initialize, "MENU");
+					</OnLoad>
+					<OnShow>
+						UIDropDownMenu_Initialize(self, TellMeWhen_IconMenu_Initialize, "MENU");
+					</OnShow>
+				</Scripts>
+			</Frame>
+		</Frames>
+	</Frame>
+
+	<Frame name="TellMeWhen_Group1" inherits="TellMeWhen_GroupTemplate" toplevel="true" movable="true" parent="UIParent" id="1">
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+				<Offset>
+					<AbsDimension x="100" y="-100"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+	</Frame>
+	<Frame name="TellMeWhen_Group2" inherits="TellMeWhen_GroupTemplate" toplevel="true" movable="true" parent="UIParent" id="2">
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+				<Offset>
+					<AbsDimension x="100" y="-150"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+	</Frame>
+	<Frame name="TellMeWhen_Group3" inherits="TellMeWhen_GroupTemplate" toplevel="true" movable="true" parent="UIParent" id="3">
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+				<Offset>
+					<AbsDimension x="100" y="-200"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+	</Frame>
+	<Frame name="TellMeWhen_Group4" inherits="TellMeWhen_GroupTemplate" toplevel="true" movable="true" parent="UIParent" id="4">
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+				<Offset>
+					<AbsDimension x="100" y="-250"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+	</Frame>
+	<Frame name="TellMeWhen_Group5" inherits="TellMeWhen_GroupTemplate" toplevel="true" movable="true" parent="UIParent" id="5">
+	<Anchors>
+		<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+			<Offset>
+				<AbsDimension x="100" y="-300"/>
+			</Offset>
+		</Anchor>
+	</Anchors>
+	</Frame>
+	<Frame name="TellMeWhen_Group6" inherits="TellMeWhen_GroupTemplate" toplevel="true" movable="true" parent="UIParent" id="6">
+	<Anchors>
+		<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+			<Offset>
+				<AbsDimension x="100" y="-350"/>
+			</Offset>
+		</Anchor>
+	</Anchors>
+	</Frame>
+	<Frame name="TellMeWhen_Group7" inherits="TellMeWhen_GroupTemplate" toplevel="true" movable="true" parent="UIParent" id="7">
+	<Anchors>
+		<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+			<Offset>
+				<AbsDimension x="100" y="-400"/>
+			</Offset>
+		</Anchor>
+	</Anchors>
+	</Frame>
+	<Frame name="TellMeWhen_Group8" inherits="TellMeWhen_GroupTemplate" toplevel="true" movable="true" parent="UIParent" id="8">
+	<Anchors>
+		<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+			<Offset>
+				<AbsDimension x="100" y="-450"/>
+			</Offset>
+		</Anchor>
+	</Anchors>
+	</Frame>
+	<Frame name="TellMeWhen_ConditionEditorFrame" parent="UIParent" enableMouse="true" >
+		<Scripts>
+			<OnLoad>self:Hide()</OnLoad> 
+		</Scripts>
+		<Size>
+			<AbsDimension x="500" y="225" /> 
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER" relativeTo="UIParent">
+				<Offset x="0" y="0" /> 
+			</Anchor>
+		</Anchors>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11" /> 
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="32" /> 
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32" /> 
+			</EdgeSize>
+		</Backdrop>
+		<Frames>
+			<Frame name="TellMeWhen_ConditionEditorGroup1">
+				<Size>
+					<AbsDimension x="500" y="225" /> 
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="0" y="0" /> 
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<Frame name="TellMeWhen_ConditionEditorType1" inherits="UIDropDownMenuTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="30" y="-60" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_SetWidth(self,90);
+								TellMeWhen_TypeMenuInit(self);						
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					<Frame name="TellMeWhen_ConditionEditorOperator1" inherits="UIDropDownMenuTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="140" y="-60" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_SetWidth(self,150);
+								TellMeWhen_OperatorMenuInit(self);						
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					<EditBox name="TellMeWhen_ConditionEditorEdit1" inherits="InputBoxTemplate">
+						<Size>
+							<AbsDimension x="25" y="40" /> 
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="345" y="-54" /> 
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>TellMeWhen_ConditionEditorEdit1:SetAutoFocus(0); self:SetNumeric(true); self:SetMaxLetters(3);</OnLoad> 
+							<OnEscapePressed>self:ClearFocus()</OnEscapePressed> 
+						</Scripts>
+					</EditBox>
+				</Frames>
+			</Frame>
+			<Frame name="TellMeWhen_ConditionEditorGroup2">
+				<Size>
+					<AbsDimension x="500" y="225" /> 
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="0" y="0" /> 
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<Frame name="TellMeWhen_ConditionEditorType2" inherits="UIDropDownMenuTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="30" y="-90" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_SetWidth(self,90);
+								TellMeWhen_TypeMenuInit(self);						
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					<Frame name="TellMeWhen_ConditionEditorOperator2" inherits="UIDropDownMenuTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="140" y="-90" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_SetWidth(self,150);
+								TellMeWhen_OperatorMenuInit(self);						
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					<EditBox name="TellMeWhen_ConditionEditorEdit2" inherits="InputBoxTemplate">
+						<Size>
+							<AbsDimension x="25" y="40" /> 
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="345" y="-84" /> 
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>self:SetAutoFocus(0); self:SetNumeric(true); self:SetMaxLetters(3);</OnLoad> 
+							<OnEscapePressed>self:ClearFocus()</OnEscapePressed> 
+						</Scripts>
+					</EditBox>
+					<Frame name="TellMeWhen_ConditionEditorAndOr2" inherits="UIDropDownMenuTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="360" y="-75" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_SetWidth(self,50);
+								TellMeWhen_AndOrMenuInit(self);						
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
+			</Frame>
+			<Frame name="TellMeWhen_ConditionEditorGroup3">
+				<Size>
+					<AbsDimension x="500" y="225" /> 
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="0" y="0" /> 
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<Frame name="TellMeWhen_ConditionEditorType3" inherits="UIDropDownMenuTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="30" y="-120" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_SetWidth(self,90);
+								TellMeWhen_TypeMenuInit(self);						
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					<Frame name="TellMeWhen_ConditionEditorOperator3" inherits="UIDropDownMenuTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="140" y="-120" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_SetWidth(self,150);
+								TellMeWhen_OperatorMenuInit(self);						
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					<EditBox name="TellMeWhen_ConditionEditorEdit3" inherits="InputBoxTemplate">
+						<Size>
+							<AbsDimension x="25" y="40" /> 
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="345" y="-114" /> 
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>self:SetAutoFocus(0); self:SetNumeric(true); self:SetMaxLetters(3);</OnLoad> 
+							<OnEscapePressed>self:ClearFocus()</OnEscapePressed> 
+						</Scripts>
+					</EditBox>
+					<Frame name="TellMeWhen_ConditionEditorAndOr3" inherits="UIDropDownMenuTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="360" y="-105" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_SetWidth(self,50);
+								TellMeWhen_AndOrMenuInit(self);						
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
+			</Frame>
+			<CheckButton name="TellMeWhen_ConditionEditorCheck1" inherits="UICheckButtonTemplate" text="">
+				<Size>
+					<AbsDimension x="20" y="20" /> 
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="15" y="-66" /> 
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>TellMeWhen_ConditionCheckboxHandler();</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="TellMeWhen_ConditionEditorCheck2" inherits="UICheckButtonTemplate" text="">
+				<Size>
+					<AbsDimension x="20" y="20" /> 
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="15" y="-96" /> 
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>TellMeWhen_ConditionCheckboxHandler();</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="TellMeWhen_ConditionEditorCheck3" inherits="UICheckButtonTemplate" text="">
+				<Size>
+					<AbsDimension x="20" y="20" /> 
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="15" y="-126" /> 
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>TellMeWhen_ConditionCheckboxHandler();</OnClick>
+				</Scripts>
+			</CheckButton>
+			<Button name="TellMeWhen_ConditionEditorCloseButton" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="CENTER" relativeTo="TellMeWhen_ConditionEditorFrame" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-22" y="-22" /> 
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self:SetFrameLevel(self:GetFrameLevel() + 4);</OnLoad> 
+					<OnClick>TellMeWhen_ConditionEditorFrame:Hide()</OnClick> 
+				</Scripts>
+			</Button>
+			<Button name="TellMeWhen_ConditionEditorResetButton" inherits="UIPanelButtonTemplate" text="TELLMEWHEN_CONDITIONPANEL_RESET">
+				<Size>
+					<AbsDimension x="60" y="20" />
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset x="15" y="15" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>TellMeWhen_ConditionEditorResetOnClick()</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="TellMeWhen_ConditionEditorOkayButton" inherits="UIPanelButtonTemplate" text="TELLMEWHEN_OKAY">
+				<Size>
+					<AbsDimension x="60" y="20" />
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset x="-75" y="15" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>TellMeWhen_ConditionEditorOkayOnClick();TellMeWhen_ConditionEditorFrame:Hide();</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="TellMeWhen_ConditionEditorCancelButton" inherits="UIPanelButtonTemplate" text="TELLMEWHEN_CANCEL">
+				<Size>
+					<AbsDimension x="60" y="20" />
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset x="-15" y="15" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>TellMeWhen_ConditionEditorFrame:Hide()</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="TellMeWhen_ConditionEditorFS1" inherits="GameFontNormal" text="TELLMEWHEN_CONDITIONPANEL_TITLE" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="170" y="-15" /> 
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="TellMeWhen_ConditionEditorFS2" inherits="GameFontNormalSmall" text="TELLMEWHEN_CONDITIONPANEL_TYPE" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="60" y="-40" /> 
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="TellMeWhen_ConditionEditorFS3" inherits="GameFontNormalSmall" text="TELLMEWHEN_CONDITIONPANEL_OPERATOR" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="180" y="-40" /> 
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="TellMeWhen_ConditionEditorFS4" inherits="GameFontNormalSmall" text="TELLMEWHEN_CONDITIONPANEL_VALUE" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="335" y="-40" /> 
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="TellMeWhen_ConditionEditorFS5" inherits="GameFontNormalSmall" text="TELLMEWHEN_CONDITIONPANEL_ANDOR" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="390" y="-40" /> 
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Frame>
+	
+	<Frame name="TellMeWhen_IconAlphaFrame" parent="UIParent" enableMouse="true" >
+		<Scripts>
+			<OnLoad>self:Hide()</OnLoad> 
+		</Scripts>
+		<Size>
+			<AbsDimension x="300" y="150" /> 
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER" relativeTo="UIParent">
+				<Offset x="0" y="0" /> 
+			</Anchor>
+		</Anchors>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11" /> 
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="32" /> 
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32" /> 
+			</EdgeSize>
+		</Backdrop>
+		<Frames>
+			<Slider name="TellMeWhen_IconAlphaSlider" inherits="OptionsSliderTemplate" minvalue="1" maxvalue="100" valuestep="1" defaultvalue="100">
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset x="80" y="50" />
+					</Anchor>
+				</Anchors>
+			</Slider>
+			<Button name="TellMeWhen_IconAlphaCloseButton" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="CENTER" relativeTo="TellMeWhen_IconAlphaFrame" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-22" y="-22" /> 
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self:SetFrameLevel(self:GetFrameLevel() + 4);</OnLoad> 
+					<OnClick>TellMeWhen_IconAlphaFrame:Hide()</OnClick> 
+				</Scripts>
+			</Button>
+			<Button name="TellMeWhen_IconAlphaOkayButton" inherits="UIPanelButtonTemplate" text="TELLMEWHEN_OKAY">
+				<Size>
+					<AbsDimension x="60" y="20" />
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset x="-75" y="15" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>TellMeWhen_IconAlphaOkayOnClick();TellMeWhen_IconAlphaFrame:Hide();</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="TellMeWhen_IconAlphaCancelButton" inherits="UIPanelButtonTemplate" text="TELLMEWHEN_CANCEL">
+				<Size>
+					<AbsDimension x="60" y="20" />
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset x="-15" y="15" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>TellMeWhen_IconAlphaFrame:Hide()</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="TellMeWhen_IconAlphaFS1" inherits="GameFontNormal" text="TELLMEWHEN_ICONALPHAPANEL_TITLE" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="70" y="-15" /> 
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="TellMeWhen_IconAlphaFS2" inherits="GameFontNormalSmall" text="TELLMEWHEN_ICONALPHAPANEL_DESC" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="20" y="-60" /> 
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Frame>
+</Ui>
+
+
+	
+

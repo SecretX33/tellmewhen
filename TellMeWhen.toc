@@ -1,0 +1,13 @@
+# Originally by Nephthys of Hyjal
+# Major Updates by Oozebull of Twisting Nether, Xenyr of Aszune, and Cybeloras of Mal'Ganis
+#
+## Interface: 40000
+## Title: TellMeWhen
+## Version: 1.4.1
+## Author: Banjankri of Blackrock
+## Notes: Notifications about cooldowns, buffs, etc.
+## OptionalDeps: LibStub,ButtonFacade
+## SavedVariablesPerCharacter: TellMeWhen_Settings
+## X-Embeds: LibStub, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0
+
+TellMeWhen.xml
