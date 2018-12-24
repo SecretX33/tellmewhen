@@ -12,7 +12,7 @@ That's where I found myself in a situation where it was me who could help myself
 Note: All credits go to the original author of TellMeWhen.
 
 -----
-Changes already made in this customized version
+Changes made in this customized version
 
 1. Fixed a problem where icons present on the screen would start flickering
 2. Fixed a problem where the spell timer of reactive spells wouldn't work at all
