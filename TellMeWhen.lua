@@ -9,7 +9,6 @@
 -- Cybeloras of Mal'Ganis
 -- --------------------
 
-
 -- -------------
 -- ADDON GLOBALS
 -- -------------
@@ -47,8 +46,6 @@ TellMeWhen_Icon_Defaults = {
 	Conditions			= {},
 	Alpha				= 100,
 };
-
-
 
 TellMeWhen_Group_Defaults = {
 	Enabled			= false,
